@@ -17,13 +17,19 @@ interface Props {
   membersData: any
   membersTransfer: any
   currentEvent: number
+  selectedEvent: number
 }
 
-const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, membersTransfer, currentEvent }) => {
+const TableStanding: React.FC<Props> = ({
+  standings,
+  playersPoint,
+  membersData,
+  membersTransfer,
+  currentEvent,
+  selectedEvent,
+}) => {
   const [elements, setElements] = useState<any>({})
-  // console.log('--standings--', standings)
-  // console.log('--playersPoint--', playersPoint)
-  // console.log('--membersTransfer--', membersTransfer)
+  const [teams, setTeams] = useState<any[]>([])
 
   useEffect(() => {
     async function fetchStaticData() {
@@ -42,9 +48,25 @@ const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, 
     fetchStaticData()
   }, [])
 
+  useEffect(() => {
+    console.log('------------playersPoint-----------', playersPoint)
+    // console.log('------------membersData-----------', membersData)
+    let _teams: any[] = []
+    if (standings && playersPoint && membersData) {
+      for (let item of standings) {
+        const newItem = { ...item, ...membersData[item.entry] }
+        _teams.push(newItem)
+      }
+    }
+    setTeams(_teams)
+    // console.log('---------------------------leagues------------------------------', _teams)
+  }, [playersPoint, membersData, standings])
+
   const renderPlayerData = (member: any) => {
     const { element: elementId, is_captain, is_vice_captain, position } = member
+    console.log('--elementId--', elementId)
     const data = playersPoint[elementId - 1]
+    console.log('--data--', data)
     const elementData = elements[elementId]
     // console.log('--elements--', elements)
     if (data && data.stats && elementData) {
@@ -99,7 +121,7 @@ const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, 
     if (!transData || isWildcard) return ''
     const transfers = Object.values(transData)
     if (Array.isArray(transfers) && transfers.length > 0) {
-      const transInGw = transfers.filter((item) => item.event === currentEvent)
+      const transInGw = transfers.filter((item) => item.event === selectedEvent)
       return (
         <div>
           {transInGw.map((item, index) => {
@@ -131,6 +153,14 @@ const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, 
     )
   }
 
+  const renderActiveChip = (chip?: string) => {
+    if (chip === '3xc') return 'Triple Captain'
+    if (chip === 'freehit') return 'Free Hit'
+    if (chip === 'bboost') return 'Bench Boost'
+    if (chip === 'wildcard') return 'Wildcard'
+    return ''
+  }
+
   return (
     <div>
       <h2 className={'mb-4 px-4 font-medium text-xl'}>Solo</h2>
@@ -140,7 +170,7 @@ const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, 
             <TableRow>
               <TableCell classes={{ root: 'bg-teal-200 font-bold' }}>Rank</TableCell>
               <TableCell classes={{ root: 'bg-teal-200 font-bold' }} align="left">
-                Manager
+                Team & Manager
               </TableCell>
               <TableCell classes={{ root: 'bg-teal-200 font-bold' }} align="left">
                 GW
@@ -166,53 +196,59 @@ const TableStanding: React.FC<Props> = ({ standings, playersPoint, membersData, 
             </TableRow>
           </TableHead>
           <TableBody>
-            {standings.map((row) => (
-              <TableRow key={row.entry} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component="th" scope="row">
-                  <div className={'flex gap-3'}>
-                    <span>{row.rank}</span> <span>{renderUpDownRank(row)}</span>
-                  </div>
-                </TableCell>
-                <TableCell align="left">
-                  <div className={'flex flex-col'}>
-                    <p>{row.entry_name}</p>
-                    <p>{row.player_name}</p>
-                  </div>
-                </TableCell>
-                <TableCell align="left">
-                  <Tooltip
-                    placement={'bottom'}
-                    arrow
-                    enterTouchDelay={150}
-                    title={
-                      <div className={'p-2'}>
-                        {membersData[row.entry] &&
-                          Array.isArray(membersData[row.entry].picks) &&
-                          membersData[row.entry].picks.map((item: any) => {
-                            return <div key={item.element}>{renderPlayerData(item)}</div>
-                          })}
-                      </div>
-                    }
-                  >
-                    <span className={'cursor-pointer'}>{row.event_total}</span>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="left">{row.total}</TableCell>
-                <TableCell align="left">{renderHits(membersData[row.entry])}</TableCell>
-                <TableCell align="left">
-                  {membersData[row.entry] ? membersData[row.entry]['active_chip'] : ''}
-                </TableCell>
-                <TableCell align="left" classes={{ root: 'text-emerald-600' }}>
-                  {renderCaptainAndVice(membersData[row.entry], 'captain')}
-                </TableCell>
-                <TableCell align="left" classes={{ root: 'text-purple-600' }}>
-                  {renderCaptainAndVice(membersData[row.entry], 'vice_captain')}
-                </TableCell>
-                <TableCell align="left">
-                  {renderTransfer(membersTransfer[row.entry], membersData[row.entry]?.['active_chip'] === 'wildcard')}
-                </TableCell>
-              </TableRow>
-            ))}
+            {teams.map((row) => {
+              return (
+                <TableRow key={row.entry} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell component="th" scope="row">
+                    <div className={'flex gap-3'}>
+                      <span>{row.rank}</span> <span>{renderUpDownRank(row)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell align="left">
+                    <div className={'flex flex-col'}>
+                      <a
+                        className={'font-bold hover:underline'}
+                        href={`https://fantasy.premierleague.com/entry/${row.entry}/event/${currentEvent}`}
+                        target={'_blank'}
+                      >
+                        {row.entry_name}
+                      </a>
+                      <p>{row.player_name}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Tooltip
+                      placement={'bottom'}
+                      arrow
+                      enterTouchDelay={150}
+                      title={
+                        <div className={'p-2'}>
+                          {membersData[row.entry] &&
+                            Array.isArray(membersData[row.entry].picks) &&
+                            membersData[row.entry].picks.map((item: any) => {
+                              return <div key={item.element}>{renderPlayerData(item)}</div>
+                            })}
+                        </div>
+                      }
+                    >
+                      <span className={'cursor-pointer'}>{row['entry_history']?.['points']}</span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="left">{row['entry_history']?.['total_points']}</TableCell>
+                  <TableCell align="left">{renderHits(membersData[row.entry])}</TableCell>
+                  <TableCell align="left">{renderActiveChip(membersData[row.entry]?.['active_chip'])}</TableCell>
+                  <TableCell align="left" classes={{ root: 'text-emerald-600' }}>
+                    {renderCaptainAndVice(membersData[row.entry], 'captain')}
+                  </TableCell>
+                  <TableCell align="left" classes={{ root: 'text-purple-600' }}>
+                    {renderCaptainAndVice(membersData[row.entry], 'vice_captain')}
+                  </TableCell>
+                  <TableCell align="left">
+                    {renderTransfer(membersTransfer[row.entry], membersData[row.entry]?.['active_chip'] === 'wildcard')}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </TableContainer>
