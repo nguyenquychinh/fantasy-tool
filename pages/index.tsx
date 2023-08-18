@@ -126,7 +126,7 @@ const Home: NextPage<Props> = ({ data, currentEvent }) => {
       </div>
 
       <div className={'mt-6 mb-10'}>
-        <TableTeams standings={standings} />
+        <TableTeams standings={standings} currentEvent={currentEvent} selectedEvent={selectedEvent} />
 
         <div className={'my-6'} />
 

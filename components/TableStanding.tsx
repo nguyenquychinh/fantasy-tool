@@ -49,7 +49,7 @@ const TableStanding: React.FC<Props> = ({
   }, [])
 
   useEffect(() => {
-    console.log('------------playersPoint-----------', playersPoint)
+    // console.log('------------playersPoint-----------', playersPoint)
     // console.log('------------membersData-----------', membersData)
     let _teams: any[] = []
     if (standings && playersPoint && membersData) {
@@ -64,9 +64,7 @@ const TableStanding: React.FC<Props> = ({
 
   const renderPlayerData = (member: any) => {
     const { element: elementId, is_captain, is_vice_captain, position } = member
-    console.log('--elementId--', elementId)
     const data = playersPoint[elementId - 1]
-    console.log('--data--', data)
     const elementData = elements[elementId]
     // console.log('--elements--', elements)
     if (data && data.stats && elementData) {
@@ -163,7 +161,7 @@ const TableStanding: React.FC<Props> = ({
 
   return (
     <div>
-      <h2 className={'mb-4 px-4 font-medium text-xl'}>Solo</h2>
+      <h2 className={'mb-4 font-medium text-xl'}>Solo</h2>
       <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableHead>
