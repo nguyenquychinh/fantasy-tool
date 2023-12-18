@@ -27,7 +27,6 @@ const TableTeams: React.FC<Props> = ({ standings, currentEvent }) => {
   const [blueTeam, setBlueTeam] = useState<any>()
 
   useEffect(() => {
-    console.log('--standings--', standings)
     if (standings) {
       let blueTeam: any[] = []
       let redTeam: any[] = []
@@ -62,9 +61,6 @@ const TableTeams: React.FC<Props> = ({ standings, currentEvent }) => {
       // setTeams(_dataTeam.sort((a, b) => b.gw_point - a.gw_point))
     }
   }, [standings])
-
-  console.log('--redTeam--', redTeam)
-  console.log('--blueTeam--', blueTeam)
 
   return (
     <div>

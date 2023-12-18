@@ -19,7 +19,6 @@ const Home: NextPage<Props> = ({ data, currentEvent }) => {
   const [listEvent, setListEvent] = useState<number[]>([])
   const [selectedEvent, setSelectedEvent] = useState<number>(currentEvent)
 
-  // console.log('--data---', data)
   useEffect(() => {
     setSelectedEvent(currentEvent)
     let _list: number[] = []
@@ -66,7 +65,6 @@ const Home: NextPage<Props> = ({ data, currentEvent }) => {
     // get players data
     async function fetchLiveData() {
       const res = await axios.get('/api/live/' + selectedEvent).then((r) => r.data)
-      console.log('--live--', res)
       if (Array.isArray(res.elements)) {
         setPlayersPoint(res.elements)
       }
